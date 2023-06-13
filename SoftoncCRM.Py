@@ -1,44 +1,8 @@
 import sys
 import json
-from PyQt5.QtWidgets import QDialog , QFormLayout, QInputDialog ,QComboBox, QMessageBox, QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem, QHeaderView, QTabWidget, QDateEdit, QSpinBox, QDoubleSpinBox
+from PyQt5.QtWidgets import QInputDialog ,QComboBox, QMessageBox, QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem, QHeaderView, QTabWidget, QDateEdit, QSpinBox, QDoubleSpinBox
 from PyQt5.QtCore import QDate
 from PyQt5.QtGui import QIcon
-
-class LoginDialog(QDialog):
-    def __init__(self):
-        super().__init__()
-        self.init_ui()
-
-    def init_ui(self):
-        self.setWindowTitle("Giriş")
-        self.setWindowIcon(QIcon("icon.png"))
-        self.setGeometry(400, 200, 300, 150)
-
-        layout = QVBoxLayout()
-        form_layout = QFormLayout()
-
-        self.username = QLineEdit()
-        self.password = QLineEdit()
-        self.password.setEchoMode(QLineEdit.Password)
-
-        form_layout.addRow("Kullanıcı Adı:", self.username)
-        form_layout.addRow("Şifre:", self.password)
-
-        self.login_button = QPushButton("Giriş")
-        self.login_button.clicked.connect(self.login)
-
-        layout.addLayout(form_layout)
-        layout.addWidget(self.login_button)
-        self.setLayout(layout)
-    def login(self):
-        username = self.username.text()
-        password = self.password.text()
-
-        if username == "purplonc" and password == "Parhesia19Oy.":
-            self.accept()
-        else:
-            self.username.clear()
-            self.password.clear()
 
 class App(QWidget):
     def __init__(self):
@@ -131,7 +95,7 @@ class App(QWidget):
         self.tab_widget.addTab(self.sale_table, 'Satışlar')
 
         self.stock_table = self.create_stock_table()
-        self.tab_widget.addTab(self.stock_table, 'Stok Takip')
+        self.tab_widget.addTab(self.stock_table, 'Stok')
 
         self.customer_table = self.create_party_table()
         self.tab_widget.addTab(self.customer_table, 'Müşteriler')
@@ -139,10 +103,35 @@ class App(QWidget):
         self.supplier_table = self.create_party_table()
         self.tab_widget.addTab(self.supplier_table, 'Tedarikçiler')
 
+        self.prices_table = self.create_prices_table()
+        self.tab_widget.addTab(self.prices_table, 'Fiyat Hesaplama')
+
         layout.addWidget(self.tab_widget)
 
         self.setLayout(layout)
-
+    def create_stock_table(self):
+        table = QTableWidget()
+        table.setColumnCount(6)
+        table.setHorizontalHeaderLabels(['Server', 'Miktar', 'Toplam Fiyat', 'Avg.Buy', 'Avg.Sell', 'Total Sales'])
+        table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
+        table.horizontalHeader().setSectionResizeMode(5, QHeaderView.Stretch)
+        return table
+    def create_prices_table(self):
+        table = QTableWidget()
+        table.setColumnCount(7)
+        table.setHorizontalHeaderLabels(['Server', 'TotalBuyPrice', 'TotBuyMik',  'TotalSellPrice', 'TotSellMik', 'Avg.Buy','Avg.Sell'])
+        table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
+        table.horizontalHeader().setSectionResizeMode(5, QHeaderView.Stretch)
+        table.horizontalHeader().setSectionResizeMode(6, QHeaderView.Stretch)
+        return table
     def create_table(self):
         table = QTableWidget()
         table.setColumnCount(5)
@@ -182,17 +171,7 @@ class App(QWidget):
           
 
 
-    def create_stock_table(self):
-        table = QTableWidget()
-        table.setColumnCount(6)
-        table.setHorizontalHeaderLabels(['Server', 'Miktar', 'Toplam Fiyat', 'Avg.Buy', 'Avg.Sell', 'Total Sales'])
-        table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-        table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-        table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
-        table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
-        table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
-        table.horizontalHeader().setSectionResizeMode(5, QHeaderView.Stretch)
-        return table
+    
     
     def calculate_profit_loss(self):
         purchase_table = self.purchase_table
@@ -271,12 +250,11 @@ class App(QWidget):
         quantity = self.quantity_input.value()
         price = self.price_input.value()
         transaction_data = {
-         "date": date,
-         "product": product,
-         "quantity": quantity,
-         "price": price
+            "date": date,
+            "product": product,
+            "quantity": quantity,
+            "price": price
         }
-
         if date and discord_address and product and quantity and price:
             if category == 'purchase':
                 table = self.purchase_table
@@ -284,26 +262,21 @@ class App(QWidget):
             else:
                 table = self.sale_table
                 party_table = self.customer_table
-
-            row = table.rowCount()
-            table.setRowCount(row + 1)
-
+            row = 0 
+            table.insertRow(row)
             table.setItem(row, 0, QTableWidgetItem(date))
             table.setItem(row, 1, QTableWidgetItem(discord_address))
             table.setItem(row, 2, QTableWidgetItem(product))
             table.setItem(row, 3, QTableWidgetItem(str(quantity)))
             table.setItem(row, 4, QTableWidgetItem(f"{price:.2f}"))
-
             self.update_stock_table(product, quantity, price, category)
             transaction_data = {
-            "date": date,
-            "product": product,
-            "quantity": quantity,
-            "price": price 
-             }
+                "date": date,
+                "product": product,
+                "quantity": quantity,
+                "price": price 
+            }
             self.update_party_table(discord_address, party_table, transaction_data, category)
-
-
             self.discord_address_input.clear()
             self.product_input.clear()
             self.quantity_input.setValue(1)
@@ -311,18 +284,19 @@ class App(QWidget):
             self.calculate_profit_loss()
     def update_party_table(self, discord_address, table, transaction_data, category):
         row_count = table.rowCount()
-
         for row in range(row_count):
             if table.item(row, 0).text() == discord_address:
-             current_details = table.item(row, 1).text()
-             new_details = self.get_updated_details(current_details, transaction_data, category)
-             table.setItem(row, 1, QTableWidgetItem(new_details))
-             break
+                current_details = table.item(row, 1).text()
+                if transaction_data['product'] not in current_details.split(', '):
+                    new_details = self.get_updated_details(current_details, transaction_data, category)
+                    table.setItem(row, 1, QTableWidgetItem(new_details))
+                break
         else:
             table.setRowCount(row_count + 1)
             table.setItem(row_count, 0, QTableWidgetItem(discord_address))
             initial_details = self.get_initial_details(transaction_data, category)
             table.setItem(row_count, 1, QTableWidgetItem(initial_details))
+
             
     def get_initial_details(self, transaction_data, category):
         initial_details = f"{transaction_data['product']}"
